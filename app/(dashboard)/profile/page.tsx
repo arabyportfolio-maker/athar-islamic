@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import { Settings, BarChart2, Clock, Heart, Target, ChevronLeft, Award, Flame, BookMarked, Star } from 'lucide-react'
 import { formatNumber } from '@/lib/utils'
 
@@ -25,6 +26,53 @@ const MENU = [
 ]
 
 export default function ProfilePage() {
+  const [stats, setStats] = useState({ tasbeeh: 0, sessions: 0, quran: 0 })
+  const [userProfile, setUserProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    import('@/store/userStore').then(({ useUserStore }) => {
+      const user = useUserStore.getState().user
+      if (user) {
+        setUserProfile(user)
+        import('@/lib/supabase').then(({ supabase }) => {
+          Promise.all([
+            supabase.from('tasbeeh_records').select('count').eq('user_id', user.id),
+            supabase.from('quran_records').select('id').eq('user_id', user.id)
+          ]).then(([tasbeehRes, quranRes]) => {
+            const totalTasbeeh = tasbeehRes.data?.reduce((acc, row) => acc + (row.count || 0), 0) || 0
+            const sessions = tasbeehRes.data?.length || 0
+            const quranBookmarks = quranRes.data?.length || 0
+            setStats({ tasbeeh: totalTasbeeh, sessions, quran: quranBookmarks })
+            setLoading(false)
+          })
+        })
+      } else {
+        setLoading(false)
+      }
+    })
+  }, [])
+
+  if (loading) return <div className="p-8 text-center font-bold text-primary-900">جاري التحميل...</div>
+
+  if (!userProfile) {
+    return (
+      <div className="min-h-screen bg-warm-100 flex flex-col items-center justify-center p-6" dir="rtl">
+        <h2 className="text-xl font-bold text-primary-900 mb-4">يجب تسجيل الدخول</h2>
+        <p className="text-text-muted mb-8 text-center">قم بتسجيل الدخول لتتمكن من رؤية إحصائياتك ومتابعة تقدمك.</p>
+        <Link href="/login" className="px-8 py-3 bg-primary-900 text-white rounded-xl font-bold hover:bg-primary transition-colors">
+          تسجيل الدخول
+        </Link>
+      </div>
+    )
+  }
+
+  const STATS_DATA = [
+    { val: formatNumber(stats.tasbeeh), label:'تسبيحة', Icon: BarChart2, color:'text-primary-900', bg:'bg-primary-50' },
+    { val: formatNumber(stats.sessions),  label:'جلسة',   Icon: Clock,     color:'text-gold-600', bg:'bg-warm-50' },
+    { val: formatNumber(stats.quran),     label:'علامة قرآن', Icon: BookMarked, color:'text-primary', bg:'bg-primary-50' },
+  ]
+
   return (
     <div className="min-h-screen bg-warm-100 font-sans pb-32" dir="rtl">
 
@@ -41,11 +89,11 @@ export default function ProfilePage() {
         
         <div className="absolute -bottom-14 right-6 flex items-end gap-4 z-20">
           <div className="w-24 h-24 rounded-[1.5rem] bg-gradient-to-br from-gold-400 to-orange-500 border-4 border-warm-100 shadow-floating flex items-center justify-center text-3xl font-black text-white">
-            أ
+            {userProfile.user_metadata?.full_name?.charAt(0) || userProfile.email?.charAt(0) || 'أ'}
           </div>
           <div className="mb-2">
-            <div className="text-xl font-bold text-primary-900 leading-tight">أحمد محمد عبد الله</div>
-            <div className="text-sm font-semibold text-text-muted">@ahmed.muhammad</div>
+            <div className="text-xl font-bold text-primary-900 leading-tight">{userProfile.user_metadata?.full_name || 'مستخدم أثر'}</div>
+            <div className="text-sm font-semibold text-text-muted">{userProfile.email}</div>
           </div>
         </div>
       </div>
@@ -54,7 +102,7 @@ export default function ProfilePage() {
 
         {/* ── Stats ──────────────────────────────────────── */}
         <div className="grid grid-cols-3 gap-3">
-          {STATS.map(s => (
+          {STATS_DATA.map(s => (
             <div key={s.label} className="bg-white rounded-2xl p-4 text-center border border-border-light shadow-sm flex flex-col items-center">
               <div className={`w-10 h-10 rounded-xl ${s.bg} ${s.color} flex items-center justify-center mb-2`}>
                 <s.Icon size={20} />

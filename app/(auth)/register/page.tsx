@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { signUp } from '@/lib/supabase'
 import { useState } from 'react'
 import { Eye, EyeOff, ChevronRight } from 'lucide-react'
 
@@ -17,8 +18,14 @@ export default function RegisterPage() {
     e.preventDefault()
     if (!form.terms) return alert('يرجى الموافقة على الشروط')
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1400))
-    window.location.href = '/home'
+    const { error, data } = await signUp(form.email, form.pass, form.name)
+    setLoading(false)
+    if (error) {
+      alert(error.message)
+    } else {
+      alert('تم إنشاء الحساب بنجاح! يرجى تأكيد بريدك الإلكتروني إذا طلب منك ذلك.')
+      window.location.href = '/login'
+    }
   }
 
   const inpClass = "w-full px-4 py-3.5 rounded-xl border border-border-light bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all font-sans text-sm shadow-sm text-primary-900"

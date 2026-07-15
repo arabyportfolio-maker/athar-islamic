@@ -33,6 +33,23 @@ export const useTasbeehStore = create<TasbeehState>()(
       reset: (id = 'current') => set(s => {
         const targetId = id === 'current' ? (s.selectedDhikr?.id || 'subhan') : id
         const currentCount = s.counts[targetId] || 0
+        
+        if (currentCount > 0) {
+          // Sync with Supabase asynchronously
+          import('@/store/userStore').then(({ useUserStore }) => {
+            const user = useUserStore.getState().user
+            if (user) {
+              import('@/lib/supabase').then(({ saveTasbeehSession }) => {
+                saveTasbeehSession({
+                  user_id: user.id,
+                  dhikr: targetId,
+                  count: currentCount
+                })
+              })
+            }
+          })
+        }
+
         return {
           counts: { ...s.counts, [targetId]: 0 },
           sessions: s.sessions + (currentCount > 0 ? 1 : 0),

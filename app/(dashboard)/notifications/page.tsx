@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bell, CheckCircle, Info, Star, Users, Clock, X, BookMarked } from 'lucide-react'
 
 type NotifType = 'prayer'|'dhikr'|'community'|'quran'|'system'
@@ -11,27 +11,49 @@ const TYPE_CFG: Record<NotifType,{Icon:React.ElementType;color:string;bg:string;
   system:    { Icon:Info,       color:'text-text-muted',  bg:'bg-warm-200',   border:'border-border-light' },
 }
 
-const NOTIFICATIONS = [
-  { id:'1', type:'prayer'    as NotifType, title:'وقت الصلاة',          body:'حان وقت صلاة المغرب — 18:21',    time:'الآن',       read:false },
-  { id:'2', type:'dhikr'     as NotifType, title:'تذكير الأذكار',        body:'أذكار الصباح — ابدأ يومك بذكر الله', time:'10د',     read:false },
-  { id:'3', type:'community' as NotifType, title:'تحدي جديد',            body:'انضم لتحدي الختمة الشهرية',      time:'1س',        read:false },
-  { id:'4', type:'prayer'    as NotifType, title:'وقت الصلاة',          body:'حان وقت صلاة العصر — 15:43',    time:'3س',        read:true  },
-  { id:'5', type:'quran'     as NotifType, title:'ورد القرآن اليومي',    body:'تابع قراءة سورة البقرة — الآية 45', time:'5س',    read:true  },
-  { id:'6', type:'community' as NotifType, title:'شارك في مجتمع أثر',   body:'أحمد بدأ جلسة تسبيح جماعية',   time:'أمس',       read:true  },
-  { id:'7', type:'system'    as NotifType, title:'تحديث التطبيق',        body:'إصدار جديد متاح — تحديثات مهمة', time:'أمس',      read:true  },
-]
-
 export default function NotificationsPage() {
-  const [notifs, setNotifs] = useState(NOTIFICATIONS)
-  const unread = notifs.filter(n => !n.read).length
+  const [notifs, setNotifs] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const markRead    = (id: string) => setNotifs(ns => ns.map(n => n.id===id ? {...n,read:true} : n))
-  const dismiss     = (id: string) => setNotifs(ns => ns.filter(n => n.id!==id))
-  const markAllRead = () => setNotifs(ns => ns.map(n => ({...n,read:true})))
+  useEffect(() => {
+    import('@/store/userStore').then(({ useUserStore }) => {
+      const user = useUserStore.getState().user
+      if (user) {
+        import('@/lib/supabase').then(({ getNotifications }) => {
+          getNotifications(user.id).then(({ data }) => {
+            setNotifs(data || [])
+            setLoading(false)
+          })
+        })
+      } else {
+        setLoading(false)
+      }
+    })
+  }, [])
+
+  const unread = notifs.filter(n => !n.is_read).length
+
+  const markRead = (id: string) => {
+    setNotifs(ns => ns.map(n => n.id === id ? { ...n, is_read: true } : n))
+    import('@/lib/supabase').then(({ markNotificationRead }) => markNotificationRead(id))
+  }
+  
+  const dismiss = (id: string) => {
+    setNotifs(ns => ns.filter(n => n.id !== id))
+    // We can just mark as read and hide, or delete. We will just hide locally for now.
+  }
+  
+  const markAllRead = () => {
+    setNotifs(ns => ns.map(n => ({ ...n, is_read: true })))
+    import('@/store/userStore').then(({ useUserStore }) => {
+      const user = useUserStore.getState().user
+      if (user) import('@/lib/supabase').then(({ markAllNotificationsRead }) => markAllNotificationsRead(user.id))
+    })
+  }
 
   const groups = [
-    { label:'جديدة',    items: notifs.filter(n => !n.read) },
-    { label:'مقروءة',   items: notifs.filter(n => n.read)  },
+    { label:'جديدة',    items: notifs.filter(n => !n.is_read) },
+    { label:'مقروءة',   items: notifs.filter(n => n.is_read)  },
   ].filter(g => g.items.length > 0)
 
   return (
@@ -65,25 +87,25 @@ export default function NotificationsPage() {
               {group.items.map((n, i) => {
                 const tc = TYPE_CFG[n.type]
                 return (
-                  <div key={n.id} onClick={() => markRead(n.id)} className={`animate-enter relative flex items-start gap-3 bg-white p-4 rounded-3xl border shadow-sm cursor-pointer transition-colors hover:bg-warm-50 ${n.read ? 'border-border-light' : 'border-primary-200 bg-primary-50/30'}`} style={{ animationDelay: `${i * 0.05}s` }}>
+                  <div key={n.id} onClick={() => markRead(n.id)} className={`animate-enter relative flex items-start gap-3 bg-white p-4 rounded-3xl border shadow-sm cursor-pointer transition-colors hover:bg-warm-50 ${n.is_read ? 'border-border-light' : 'border-primary-200 bg-primary-50/30'}`} style={{ animationDelay: `${i * 0.05}s` }}>
                     
                     {/* Unread indicator */}
-                    {!n.read && (
+                    {!n.is_read && (
                       <div className="absolute top-4 left-4 w-2 h-2 rounded-full bg-primary-900" />
                     )}
 
                     {/* Icon */}
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${tc.bg} ${tc.color} ${tc.border}`}>
-                      <tc.Icon size={20} />
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${tc?.bg || 'bg-warm-200'} ${tc?.color || 'text-text-muted'} ${tc?.border || 'border-border-light'}`}>
+                      {tc ? <tc.Icon size={20} /> : <Info size={20} />}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0 pt-1">
                       <div className="flex justify-between items-center mb-1">
-                        <span className={`text-sm ${n.read ? 'font-bold text-primary-900' : 'font-black text-primary-900'}`}>{n.title}</span>
-                        <span className="text-[10px] font-bold text-text-muted pr-4">{n.time}</span>
+                        <span className={`text-sm ${n.is_read ? 'font-bold text-primary-900' : 'font-black text-primary-900'}`}>{n.title?.ar || n.title || 'إشعار جديد'}</span>
+                        <span className="text-[10px] font-bold text-text-muted pr-4">{n.created_at ? new Date(n.created_at).toLocaleDateString('ar-EG') : 'الآن'}</span>
                       </div>
-                      <p className={`text-xs ${n.read ? 'font-semibold text-text-muted' : 'font-bold text-primary-800'}`}>{n.body}</p>
+                      <p className={`text-xs ${n.is_read ? 'font-semibold text-text-muted' : 'font-bold text-primary-800'}`}>{n.message?.ar || n.message || ''}</p>
                     </div>
 
                     {/* Dismiss */}

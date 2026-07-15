@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { WhatsAppButton } from '@/components/shared/WhatsAppButton'
 
+import PWAInstallPrompt from '@/components/shared/PWAInstallPrompt'
+
 export const metadata: Metadata = {
   title: { template: '%s | أثر إسلامي', default: 'أثر إسلامي' },
   description: 'منصة إسلامية متكاملة للتسبيح والأذكار والقرآن وصفحات الأثر',
@@ -17,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body style={{ margin:0, padding:0, fontFamily:"Cairo, 'Inter', sans-serif" }}>
         {children}
         <WhatsAppButton />
+        <PWAInstallPrompt />
 
         {/* ── El Araby 360 Footer ─────────────────────────── */}
         <footer style={{

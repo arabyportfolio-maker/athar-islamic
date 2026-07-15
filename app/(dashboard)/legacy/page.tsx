@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Heart, Users, Leaf, Plus, TrendingUp, ChevronLeft } from 'lucide-react'
 import { MOCK_MEMORIAL_PAGES } from '@/lib/constants'
 import { formatNumber } from '@/lib/utils'
@@ -16,10 +16,21 @@ const TYPE_CFG = {
 export default function LegacyPage() {
   const [filter, setFilter] = useState<FilterType>('all')
   const [search, setSearch] = useState('')
+  const [pages, setPages] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const filtered = MOCK_MEMORIAL_PAGES.filter(p =>
-    (filter === 'all' || p.type === filter) &&
-    (!search || p.name.includes(search))
+  useEffect(() => {
+    import('@/lib/supabase').then(({ supabase }) => {
+      supabase.from('memorial_pages').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+        setPages(data || [])
+        setLoading(false)
+      })
+    })
+  }, [])
+
+  const filtered = pages.filter(p =>
+    (filter === 'all' || p.visibility === filter) && // default to all for now
+    (!search || p.person_name?.includes(search))
   )
 
   return (
@@ -72,18 +83,18 @@ export default function LegacyPage() {
                     
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-bold text-lg text-primary-900 mb-1">{page.name}</h3>
+                        <h3 className="font-bold text-lg text-primary-900 mb-1">{page.person_name}</h3>
                         <span className={`text-xs font-bold px-3 py-1 rounded-full border ${tc.bg} ${tc.color} ${tc.border}`}>
                           {tc.label}
                         </span>
                       </div>
-                      <p className="text-xs text-text-muted font-semibold">{page.date || 'حملة مستمرة'}</p>
+                      <p className="text-xs text-text-muted font-semibold">{page.created_at ? new Date(page.created_at).toLocaleDateString('ar-EG') : 'حملة مستمرة'}</p>
                     </div>
                   </div>
 
-                  {page.bio && (
+                  {page.biography && (
                     <p className="text-sm text-text-muted leading-relaxed mb-4">
-                      {page.bio.slice(0,80)}...
+                      {page.biography.slice(0,80)}...
                     </p>
                   )}
 
@@ -91,7 +102,7 @@ export default function LegacyPage() {
                     <div className="flex-1 flex items-center gap-3">
                       <Users size={16} className="text-text-muted" />
                       <div>
-                        <div className="text-sm font-bold text-primary-900">{formatNumber(page.participants)}</div>
+                        <div className="text-sm font-bold text-primary-900">{formatNumber(page.participants || 0)}</div>
                         <div className="text-[10px] font-bold text-text-muted">مشارك</div>
                       </div>
                     </div>
@@ -99,7 +110,7 @@ export default function LegacyPage() {
                     <div className="flex-1 flex items-center gap-3">
                       <TrendingUp size={16} className="text-text-muted" />
                       <div>
-                        <div className="text-sm font-bold text-primary-900">{formatNumber(page.tasbeeh)}</div>
+                        <div className="text-sm font-bold text-primary-900">{formatNumber(page.tasbeeh || 0)}</div>
                         <div className="text-[10px] font-bold text-text-muted">تسبيحة ودعاء</div>
                       </div>
                     </div>

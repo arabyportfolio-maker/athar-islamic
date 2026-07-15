@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { signIn, signInWithGoogle } from '@/lib/supabase'
 import { useState } from 'react'
 import { Eye, EyeOff, ChevronRight } from 'lucide-react'
 
@@ -12,8 +13,13 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1200))
-    window.location.href = '/home'
+    const { error } = await signIn(email, pass)
+    setLoading(false)
+    if (error) {
+      alert(error.message)
+    } else {
+      window.location.href = '/home'
+    }
   }
 
   return (

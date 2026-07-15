@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Heart, Users, Leaf, ChevronLeft, Upload, Globe, Lock, Check } from 'lucide-react'
+import { createMemorialPage } from '@/lib/supabase'
+import { useUserStore } from '@/store/userStore'
 
 const PAGE_TYPES = [
   { id:'deceased', label:'صدقة جارية', desc:'صفحة دعاء وترحّم', Icon: Heart,  color:'text-primary-900', bg:'bg-primary-50', border:'border-primary-100' },
@@ -21,6 +23,35 @@ export default function NewLegacyPage() {
     { n:2, label:'التفاصيل' },
     { n:3, label:'مراجعة'  },
   ]
+
+  const [creating, setCreating] = useState(false)
+
+  const handleCreate = async () => {
+    if (step < 3) return setStep(s => (s + 1) as Step)
+    
+    const { user } = useUserStore.getState()
+    if (!user) {
+      alert('يجب تسجيل الدخول لإنشاء صفحة أثر')
+      return router.push('/login')
+    }
+
+    setCreating(true)
+    try {
+      const slug = form.name.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-\u0621-\u064A]/g, '') + '-' + Date.now().toString().slice(-4)
+      const { data, error } = await createMemorialPage({
+        person_name: form.name,
+        slug,
+        biography: form.bio,
+        visibility: form.visibility,
+        owner_id: user.id
+      })
+      if (error) throw error
+      router.push(`/legacy`)
+    } catch (err: any) {
+      alert(err.message || 'حدث خطأ أثناء الإنشاء')
+      setCreating(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-warm-100 font-sans pb-32" dir="rtl">
@@ -176,10 +207,10 @@ export default function NewLegacyPage() {
               </button>
             )}
             <button
-              onClick={() => { if (step < 3) setStep(s => (s+1) as Step); else router.push('/legacy') }}
-              disabled={step===2 && !form.name.trim()}
-              className={`flex-1 h-14 rounded-2xl font-bold text-lg shadow-md transition-all flex items-center justify-center gap-2 ${step===2 && !form.name.trim() ? 'bg-warm-200 text-text-muted shadow-none cursor-not-allowed' : 'bg-primary-900 text-white hover:bg-primary hover:shadow-lg hover:-translate-y-0.5'}`}>
-              {step === 3 ? 'تأكيد وإنشاء' : 'متابعة'} {step < 3 && <ChevronLeft size={20} />}
+              onClick={handleCreate}
+              disabled={(step===2 && !form.name.trim()) || creating}
+              className={`flex-1 h-14 rounded-2xl font-bold text-lg shadow-md transition-all flex items-center justify-center gap-2 ${(step===2 && !form.name.trim()) || creating ? 'bg-warm-200 text-text-muted shadow-none cursor-not-allowed' : 'bg-primary-900 text-white hover:bg-primary hover:shadow-lg hover:-translate-y-0.5'}`}>
+              {creating ? 'جاري الإنشاء...' : step === 3 ? 'تأكيد وإنشاء' : 'متابعة'} {step < 3 && <ChevronLeft size={20} />}
             </button>
           </div>
         </div>

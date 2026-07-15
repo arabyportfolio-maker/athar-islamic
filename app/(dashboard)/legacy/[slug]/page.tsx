@@ -1,5 +1,5 @@
 'use client'
-import { useState, use } from 'react'
+import { useState, use, useEffect } from 'react'
 import { MOCK_MEMORIAL_PAGES } from '@/lib/constants'
 import { formatNumber } from '@/lib/utils'
 import { Bird, MapPin, Users, BookMarked, MessageSquare, HandHeart, RefreshCcw, Send, Activity, Share2, Copy, ChevronLeft } from 'lucide-react'
@@ -13,14 +13,25 @@ const ACTIVITIES = [
 
 export default function MemorialPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
-  const page = MOCK_MEMORIAL_PAGES.find(p => p.slug === slug) || MOCK_MEMORIAL_PAGES[0]
+  const [page, setPage] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    import('@/lib/supabase').then(({ getMemorialPage }) => {
+      getMemorialPage(slug).then(({ data }) => {
+        setPage(data)
+        setLoading(false)
+      })
+    })
+  }, [slug])
+
   const [activeAction, setActiveAction] = useState<string|null>(null)
   const [counter, setCounter] = useState(0)
   const [comment, setComment] = useState('')
-  const [comments, setComments] = useState([
-    { name:'أحمد علي',    text:'رحمه الله وأسكنه فسيح جناته',    time:'أمس'     },
-    { name:'مريم حسن',   text:'اللهم اجعل قبره روضة من رياض الجنة', time:'منذ يومين' },
-  ])
+  const [comments, setComments] = useState<any[]>([])
+
+  if (loading) return <div className="p-8 text-center">جاري التحميل...</div>
+  if (!page) return <div className="p-8 text-center">الصفحة غير موجودة</div>
 
   const ACTIONS = [
     { id:'tasbeeh', Icon: HandHeart,     label:'تسبيح',    color:'text-primary-900', bg:'bg-primary-50', border:'border-primary-100' },
@@ -42,7 +53,7 @@ export default function MemorialPage({ params }: { params: Promise<{ slug: strin
       {/* ── Header ───────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between shadow-sm border-b border-border-light">
         <div className="w-10"></div> {/* Spacer */}
-        <h1 className="text-lg font-bold text-primary-900 truncate px-4">{page.name}</h1>
+        <h1 className="text-lg font-bold text-primary-900 truncate px-4">{page.person_name}</h1>
         <button onClick={() => window.history.back()} className="w-10 h-10 flex items-center justify-center rounded-full bg-warm-100 hover:bg-warm-200 transition-colors">
           <ChevronLeft size={20} className="text-text-muted" />
         </button>
@@ -67,10 +78,10 @@ export default function MemorialPage({ params }: { params: Promise<{ slug: strin
         
         {/* ── Info ───────────────────────────────────────── */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-primary-900 mb-1">{page.name}</h1>
+          <h1 className="text-2xl font-bold text-primary-900 mb-1">{page.person_name}</h1>
           <p className="text-sm font-bold text-text-muted mb-2">رحمه الله</p>
           <div className="flex items-center justify-center gap-3 text-xs font-semibold text-text-muted">
-            {page.date && <span>{page.date}</span>}
+            {page.created_at && <span>{new Date(page.created_at).toLocaleDateString('ar-EG')}</span>}
             {page.country && (
               <>
                 <span className="w-1 h-1 rounded-full bg-border"></span>
@@ -80,17 +91,17 @@ export default function MemorialPage({ params }: { params: Promise<{ slug: strin
           </div>
         </div>
 
-        {page.bio && (
+        {page.biography && (
           <div className="bg-white rounded-3xl p-5 mb-6 border border-border-light shadow-sm text-center">
-            <p className="text-sm font-semibold text-text-muted leading-relaxed">"{page.bio}"</p>
+            <p className="text-sm font-semibold text-text-muted leading-relaxed">"{page.biography}"</p>
           </div>
         )}
 
         {/* ── Stats ──────────────────────────────────────── */}
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { n:formatNumber(page.participants), l:'مشارك',  Icon: Users, c:'text-primary-900', bg:'bg-primary-50' },
-            { n:formatNumber(page.tasbeeh),      l:'تسبيحة', Icon: HandHeart, c:'text-gold-600', bg:'bg-warm-50' },
+            { n:formatNumber(page.participants?.[0]?.count || 0), l:'مشارك',  Icon: Users, c:'text-primary-900', bg:'bg-primary-50' },
+            { n:formatNumber(page.tasbeeh_records?.[0]?.count || 0),      l:'تسبيحة', Icon: HandHeart, c:'text-gold-600', bg:'bg-warm-50' },
             { n:'3',                              l:'ختمة',   Icon: BookMarked, c:'text-primary', bg:'bg-primary-50' },
           ].map(s => (
             <div key={s.l} className="bg-white rounded-2xl p-4 text-center border border-border-light shadow-sm flex flex-col items-center">
@@ -130,7 +141,24 @@ export default function MemorialPage({ params }: { params: Promise<{ slug: strin
                 <button onClick={() => setCounter(c => c + 1)} className="w-20 h-20 rounded-full bg-gold-500 text-white flex items-center justify-center shadow-lg hover:bg-gold-400 hover:scale-105 active:scale-95 transition-all">
                   <HandHeart size={36} />
                 </button>
-                <button onClick={() => setCounter(0)} className="w-14 h-14 rounded-full bg-white/10 text-white flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all self-end mb-3">
+                <button onClick={() => {
+                  if (counter > 0) {
+                    import('@/store/userStore').then(({ useUserStore }) => {
+                      const user = useUserStore.getState().user
+                      if (user) {
+                        import('@/lib/supabase').then(({ saveTasbeehSession }) => {
+                          saveTasbeehSession({
+                            user_id: user.id,
+                            dhikr: 'legacy',
+                            count: counter,
+                            page_id: page.id
+                          })
+                        })
+                      }
+                    })
+                  }
+                  setCounter(0)
+                }} className="w-14 h-14 rounded-full bg-white/10 text-white flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all self-end mb-3">
                   <RefreshCcw size={20} />
                 </button>
               </div>

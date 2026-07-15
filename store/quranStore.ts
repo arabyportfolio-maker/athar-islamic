@@ -59,12 +59,24 @@ export const useQuranStore = create<QuranState>()(
       
       setReciterId: (reciterId) => set({ reciterId }),
 
-      saveBookmark: (surah, ayah, page) => set((state) => ({
-        bookmarks: {
-          ...state.bookmarks,
-          [surah]: { surah, ayah, page }
+      saveBookmark: (surah, ayah, page) => set((state) => {
+        // Sync with Supabase asynchronously
+        import('@/store/userStore').then(({ useUserStore }) => {
+          const user = useUserStore.getState().user
+          if (user) {
+            import('@/lib/supabase').then(({ saveQuranBookmark }) => {
+              saveQuranBookmark(user.id, surah, ayah)
+            })
+          }
+        })
+
+        return {
+          bookmarks: {
+            ...state.bookmarks,
+            [surah]: { surah, ayah, page }
+          }
         }
-      })),
+      }),
 
       removeBookmark: (surah) => set((state) => {
         const newBookmarks = { ...state.bookmarks }

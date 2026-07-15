@@ -45,12 +45,14 @@ export const getMemorialPage = async (slug: string) => {
 }
 
 export const createMemorialPage = async (payload: {
-  name:       string
+  person_name: string
   slug:       string
-  bio?:       string
-  type:       string
+  biography?: string
+  type?:      string
   visibility: string
-  user_id:    string
+  owner_id:   string
+  gender?:    string
+  country?:   string
 }) => supabase.from('memorial_pages').insert(payload).select().single()
 
 // ── Tasbeeh ───────────────────────────────────────────────────────────────────
@@ -61,6 +63,13 @@ export const saveTasbeehSession = async (session: {
   count:      number
   page_id?:   string
 }) => supabase.from('tasbeeh_records').insert(session)
+
+export const saveQuranBookmark = async (user_id: string, surah_number: number, ayah_number: number) => {
+  // Try to find if one exists to update, or just insert new progress
+  // Since we want the latest, we can do an upsert if we had a unique constraint on (user_id, surah_number), but we don't.
+  // We'll just insert a new record for history.
+  return supabase.from('quran_records').insert({ user_id, surah_number, ayah_number })
+}
 
 export const getTodayTasbeeh = async (userId: string) => {
   const today = new Date().toISOString().split('T')[0]
@@ -100,4 +109,23 @@ export const getUserStats = async (userId: string) => {
     .eq('user_id', userId)
     .single()
   return { data, error }
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+
+export const getNotifications = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  return { data, error }
+}
+
+export const markNotificationRead = async (notificationId: string) => {
+  return supabase.from('notifications').update({ is_read: true }).eq('id', notificationId)
+}
+
+export const markAllNotificationsRead = async (userId: string) => {
+  return supabase.from('notifications').update({ is_read: true }).eq('user_id', userId).eq('is_read', false)
 }
