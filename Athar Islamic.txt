@@ -1,0 +1,1369 @@
+ممتاز، وصلنا لمرحلة المطورين. من الجزء ده أي Frontend أو Backend Developer يقدر يبدأ يكتب الكود مباشرة.
+
+Athar-Islamic
+05 — Frontend Architecture & Backend Structure
+
+Version: 1.0
+
+1. Tech Stack
+Frontend
+Next.js 15 (App Router)
+TypeScript
+Tailwind CSS
+shadcn/ui
+Framer Motion
+Zustand
+TanStack Query
+React Hook Form
+Zod
+next-intl
+next-pwa
+Backend
+Supabase
+PostgreSQL
+Edge Functions
+Storage
+Realtime
+Authentication
+2. Folder Structure
+src/
+
+│
+
+├── app/
+
+│ ├── (auth)
+
+│ ├── dashboard
+
+│ ├── tasbeeh
+
+│ ├── quran
+
+│ ├── azkar
+
+│ ├── memorial
+
+│ ├── community
+
+│ ├── profile
+
+│ ├── settings
+
+│ └── admin
+
+│
+
+├── components/
+
+│ ├── ui
+
+│ ├── layout
+
+│ ├── cards
+
+│ ├── charts
+
+│ ├── memorial
+
+│ ├── quran
+
+│ ├── azkar
+
+│ ├── tasbeeh
+
+│ └── shared
+
+│
+
+├── hooks/
+
+├── services/
+
+├── store/
+
+├── lib/
+
+├── types/
+
+├── utils/
+
+├── styles/
+
+├── assets/
+
+└── middleware.ts
+3. Components Structure
+
+كل Component يكون مسؤول عن وظيفة واحدة.
+
+مثال
+
+components/
+
+Button
+
+Card
+
+Modal
+
+Avatar
+
+Badge
+
+Dialog
+
+Counter
+
+Progress
+
+Navbar
+
+Sidebar
+
+Footer
+
+PrayerCard
+
+DhikrCard
+
+MemorialCard
+
+TreeCard
+
+ChallengeCard
+4. Naming Convention
+
+Components
+
+PascalCase
+
+مثال
+
+TasbeehCard.tsx
+
+Hooks
+
+useTasbeeh.ts
+
+Functions
+
+camelCase
+
+Types
+
+TasbeehType
+
+Interfaces
+
+UserProfile
+
+Constants
+
+UPPER_CASE
+5. Routing
+/
+
+/login
+
+/register
+
+/home
+
+/tasbeeh
+
+/quran
+
+/azkar
+
+/prayer
+
+/memorial
+
+/memorial/[slug]
+
+/community
+
+/profile
+
+/settings
+
+/admin
+6. Layout System
+
+Root Layout
+
+↓
+
+Auth Layout
+
+↓
+
+Dashboard Layout
+
+↓
+
+Admin Layout
+
+كل Layout يحتوي على
+
+Navbar
+
+Sidebar
+
+Footer
+
+Toast
+
+Dialog Provider
+
+Theme Provider
+
+7. State Management
+
+استخدام Zustand لإدارة الحالة العامة.
+
+Stores:
+
+authStore
+
+themeStore
+
+tasbeehStore
+
+userStore
+
+notificationStore
+
+settingsStore
+
+memorialStore
+
+challengeStore
+8. API Layer
+
+يفضل فصل جميع الطلبات في Services.
+
+services/
+
+auth.service.ts
+
+profile.service.ts
+
+tasbeeh.service.ts
+
+quran.service.ts
+
+azkar.service.ts
+
+memorial.service.ts
+
+challenge.service.ts
+
+notification.service.ts
+9. Forms
+
+استخدام:
+
+React Hook Form
+Zod
+
+كل Form يحتوي على:
+
+Validation
+Loading
+Error Handling
+Success State
+10. Error Handling
+
+صفحات مخصصة:
+
+404
+
+500
+
+Offline
+
+Maintenance
+11. Theme System
+
+Themes:
+
+Emerald
+Dark
+Gold
+Light
+
+مع إمكانية إضافة Themes جديدة مستقبلاً.
+
+12. Internationalization (i18n)
+
+اللغات:
+
+العربية
+الإنجليزية
+الفرنسية
+التركية
+الإندونيسية
+
+والتصميم يدعم RTL وLTR بالكامل.
+
+13. Performance
+Lazy Loading
+Image Optimization
+Code Splitting
+Dynamic Imports
+Server Components
+Edge Rendering
+14. Security
+Middleware لحماية الصفحات.
+التحقق من صلاحيات المستخدم.
+التحقق من المدخلات.
+حماية الصور المرفوعة.
+حماية الـ APIs من الإساءة.
+15. Backend Modules
+Authentication
+
+Users
+
+Profiles
+
+Azkar
+
+Quran
+
+Prayer
+
+Memorial
+
+Family
+
+Challenges
+
+Statistics
+
+Notifications
+
+Reports
+
+Admin
+16. Notification System
+
+أنواع الإشعارات:
+
+Reminder
+Achievement
+Community
+Memorial
+System
+Security
+17. Logging
+
+تسجيل:
+
+Login
+Logout
+إنشاء صفحة أثر
+مشاركة
+حذف
+تعديل
+انضمام لتحدي
+18. PWA Features
+Install App
+Offline Mode
+Background Sync
+Push Notifications
+App Shortcuts
+19. Deployment
+Frontend
+Vercel
+Backend
+Supabase
+Storage
+Supabase Storage
+Domain
+athar-islamic.com (أو أي نطاق تختاره)
+20. Coding Standards
+TypeScript Strict Mode.
+ESLint + Prettier.
+مكونات صغيرة وقابلة لإعادة الاستخدام.
+عدم تكرار الكود (DRY).
+كتابة تعليقات للمنطق المعقد فقط.
+الالتزام بمعايير الوصول (Accessibility).
+21. Future Architecture
+
+النظام مصمم بحيث يمكن إضافة:
+
+تطبيق Android.
+تطبيق iOS.
+ساعة ذكية (Wear OS / watchOS).
+إضافة AI Assistant.
+إضافة حسابات للمساجد والمؤسسات.
+لوحة تحكم متعددة المستويات (Super Admin / Admin / Moderator).
+22. اقتراحات احترافية إضافية
+
+بدل أن يكون Athar-Islamic مجرد تطبيق، يمكن تقسيمه إلى ثلاثة منتجات مترابطة:
+
+Athar Personal
+
+للأفراد، ويشمل الأذكار والقرآن والأهداف الشخصية.
+
+Athar Legacy
+
+خاص بصفحات الأثر والصفحات التذكارية والعائلية.
+
+Athar Community
+
+خاص بالتحديات الجماعية، المساجد، والمؤسسات.
+
+بهذا التقسيم يصبح المشروع قابلًا للتوسع مستقبلًا دون الحاجة لإعادة تصميم النظام.
+
+نهاية الجزء الخامس
+
+في الجزء السادس هنبني:
+
+Admin Dashboard بالكامل.
+جميع صلاحيات المستخدمين.
+نظام الإشراف والمراجعة.
+AI Features (الاقتراحات الذكية، البحث الذكي، المساعد الإسلامي، والتوصيات حسب الوقت والمناسبة). وده هيكون من أكثر الأجزاء تميزًا في المشروع.
+اللي بعدو 
+
+ممتاز، وصلنا لآخر جزء مهم في الـ Documentation. الجزء ده هيخلي المشروع بمستوى Startup حقيقي.
+
+Athar-Islamic
+06 — Admin Dashboard & AI Features
+
+Version 1.0
+
+Part 1 — Admin Dashboard
+الهدف
+
+لوحة تحكم متكاملة لإدارة المنصة بالكامل، مع صلاحيات متعددة وإحصائيات مباشرة.
+
+Dashboard Home
+
+تحتوي على:
+
+KPI Cards
+Total Users
+Active Users Today
+Memorial Pages
+Tasbeeh Today
+Quran Sessions
+New Registrations
+Reports
+Online Users
+Charts
+Daily Users
+Monthly Users
+Countries
+Device Types
+Traffic Sources
+Top Features
+Live Feed
+
+يعرض آخر الأنشطة:
+
+مستخدم جديد
+إنشاء صفحة أثر
+مشاركة في ختمة
+بلاغ جديد
+تعليق جديد
+Users Management
+
+جدول يحتوي على:
+
+الاسم
+البريد الإلكتروني
+الدولة
+تاريخ التسجيل
+آخر نشاط
+نوع الحساب
+الحالة
+
+الإجراءات:
+
+عرض
+تعديل
+إيقاف
+حذف
+إرسال إشعار
+Memorial Management
+
+إدارة صفحات الأثر.
+
+كل صفحة تعرض:
+
+صورة
+الاسم
+عدد المشاركين
+عدد الدعوات
+عدد الزيارات
+حالة الصفحة
+
+الإجراءات:
+
+اعتماد
+إخفاء
+تعديل
+حذف
+Azkar Management
+
+إضافة ذكر جديد
+
+تعديل
+
+حذف
+
+ترتيب
+
+تصنيف
+
+إضافة صوت
+
+إضافة المصدر
+
+Quran Management
+إدارة الترجمات
+إدارة التفسير
+إدارة القراء
+إدارة الملفات الصوتية
+Community Management
+إنشاء تحديات
+إنهاء تحديات
+تعديل الأهداف
+مراجعة المشاركات
+Reports
+
+أنواع البلاغات:
+
+محتوى غير مناسب
+إساءة استخدام
+صورة مخالفة
+اسم غير مناسب
+سبام
+Notifications
+
+إرسال إشعار إلى:
+
+جميع المستخدمين
+دولة معينة
+مستخدم معين
+المشاركين في صفحة أثر
+المشاركين في تحدي
+Roles
+Guest
+
+تصفح فقط
+
+User
+
+كل المزايا الأساسية
+
+Premium
+
+مزايا إضافية
+
+Moderator
+
+مراجعة المحتوى
+
+Admin
+
+إدارة كاملة
+
+Super Admin
+
+جميع الصلاحيات
+
+Audit Logs
+
+يسجل:
+
+Login
+Delete
+Update
+Create
+Approve
+Reject
+Analytics
+
+تعرض:
+
+DAU
+MAU
+Retention
+Bounce Rate
+Session Time
+Conversion
+Part 2 — AI Features
+AI Assistant
+
+زر ثابت داخل التطبيق.
+
+يمكن للمستخدم سؤاله:
+
+ما هو أفضل ذكر الآن؟
+ماذا أقرأ اليوم؟
+اقترح وردًا مناسبًا.
+ماذا أفعل بعد الصلاة؟
+
+ملاحظة: تكون الإجابات مبنية على مصادر موثوقة، ويُفضل أن تكون الاقتراحات في الأمور العامة والتنظيمية، وليس إصدار فتاوى أو أحكام شرعية.
+
+Smart Recommendation
+
+حسب الوقت
+
+Morning
+
+↓
+
+Morning Azkar
+
+Friday
+
+↓
+
+Surat Al-Kahf
+
+Ramadan
+
+↓
+
+Daily Khatmah
+
+After Prayer
+
+↓
+
+Tasbeeh
+
+AI Search
+
+يكتب المستخدم
+
+"دعاء الكرب"
+
+يعرض مباشرة النتائج.
+
+Smart Memorial
+
+يقترح ترتيب الصفحة.
+
+مثلاً
+
+Biography
+
+↓
+
+Quran
+
+↓
+
+Dua
+
+↓
+
+Tasbeeh
+
+↓
+
+Share
+
+AI Summary
+
+يلخص
+
+المقالات
+الشروحات
+فوائد الذكر
+
+بلغة بسيطة.
+
+Smart Notification
+
+إذا لاحظ أن المستخدم لم يدخل منذ أيام.
+
+يرسل
+
+اشتقنا إليك، لا تنس وردك اليوم.
+
+Smart Goals
+
+يقترح
+
+100 استغفار
+
+↓
+
+ثم
+
+300
+
+↓
+
+500
+
+↓
+
+1000
+
+حسب نشاط المستخدم.
+
+AI Translation
+
+ترجمة
+
+الأذكار
+
+الواجهة
+
+التعليقات
+
+إلى لغات متعددة.
+
+Smart Accessibility
+
+إذا كان المستخدم كبير السن.
+
+يكبر الخط تلقائيًا.
+
+يزيد حجم الأزرار.
+
+AI Insights
+
+كل أسبوع.
+
+يعرض
+
+أكثر ذكر استخدمته.
+أكثر وقت تتعبد فيه.
+مدى التزامك بالأهداف.
+
+ويقدم إحصاءات تحفيزية دون الادعاء بقياس الأجر أو الثواب.
+
+AI Content Moderation
+
+يفحص:
+
+التعليقات.
+أسماء الصفحات.
+الصور.
+
+ويمنع المحتوى المخالف أو المسيء.
+
+Future AI Features
+البحث الصوتي.
+قراءة الأذكار بصوت طبيعي.
+تلخيص الكتب الإسلامية.
+مساعد لتنظيم الورد اليومي.
+اقتراح خطط ختم القرآن.
+Final Roadmap
+V1
+Tasbeeh
+Azkar
+Quran
+Memorial
+Profile
+V2
+Community
+Challenges
+Statistics
+Family
+V3
+AI Assistant
+Voice Features
+Smart Recommendations
+V4
+Android
+iOS
+Smart Watch
+Desktop App
+Recommended Stack
+Frontend: Next.js + TypeScript + Tailwind CSS + shadcn/ui
+Backend: Supabase
+Hosting: Vercel
+Analytics: PostHog
+Monitoring: Sentry
+Storage: Supabase Storage
+توصيات نهائية للمشروع
+
+بعد مراجعة الفكرة كاملة، عندي بعض الاقتراحات اللي أعتقد هترفع مستوى المشروع:
+
+غير الاسم من "Memorial" إلى "Athar Pages" داخل الواجهة، لأنه أشمل ويشمل الأحياء والمتوفين وحملات الخير.
+اعمل نظام Plugins بحيث تضيف ميزات مستقبلًا (مثل الزكاة أو الحج أو حلقات التحفيظ) بدون إعادة بناء المشروع.
+أضف حسابات للمساجد والمؤسسات، بحيث يكون لكل مسجد صفحة وتحديات خاصة به.
+لا تعرض أي "عداد حسنات" أو تقديرات للثواب، واكتفِ بعرض عدد المشاركات والأعمال المنجزة داخل التطبيق، لأن الثواب أمر غيبي لا يمكن قياسه.
+ابنِ الهوية البصرية حول كلمة "Athar" باستخدام شعار بسيط يرمز للأثر الممتد (مثل دائرة تنمو أو ورقة شجرة)، ليكون سهل التذكر وقابلًا للتوسع كعلامة تجارية.
+
+بهذا تكتمل النسخة الأولى من الـ Documentation، ويمكن بعد ذلك الانتقال إلى مرحلة تصميم الواجهات التفصيلية أو بدء التنفيذ الفعلي للمشروع.
+
+كمل
+
+ممتاز، دلوقتي هنكتب آخر ملف، وده أهم ملف لو هتستخدم AI زي Cursor أو Claude Code أو GPT-5 أو Lovable أو Bolt.
+
+Athar-Islamic
+07 — Master Prompt (Implementation Specification)
+
+Version: 1.0
+
+ROLE
+
+You are the lead software architect, senior UI/UX designer, senior frontend engineer, senior backend engineer, database architect, product designer, and DevOps engineer.
+
+You are responsible for building an enterprise-grade Islamic platform called Athar-Islamic.
+
+Do not generate demo code.
+
+Do not simplify.
+
+Everything should be production-ready.
+
+PROJECT
+
+Build a premium Islamic web platform inspired by Apple, Notion, Spotify and Headspace.
+
+The platform should feel peaceful, elegant and modern.
+
+It is NOT a Tasbeeh website.
+
+It is a complete Islamic ecosystem.
+
+OBJECTIVES
+
+The application helps Muslims:
+
+Read Quran
+Read Azkar
+Make Tasbeeh
+Create Memorial Pages
+Create Family Pages
+Join Challenges
+Track Worship
+Build Daily Habits
+Participate in Charity Campaigns
+DESIGN STYLE
+
+Modern
+
+Minimal
+
+Premium
+
+Elegant
+
+Clean
+
+Rounded
+
+Soft Shadows
+
+Glass Morphism
+
+Smooth Animations
+
+Large Cards
+
+Beautiful Typography
+
+Micro Interactions
+
+COLORS
+
+Primary
+
+Emerald Green
+
+Secondary
+
+Gold
+
+Background
+
+Warm White
+
+Cards
+
+White
+
+Text
+
+Dark Gray
+
+TYPOGRAPHY
+
+Primary
+
+Cairo
+
+Secondary
+
+Inter
+
+STACK
+
+Frontend
+
+Next.js 15
+
+TypeScript
+
+TailwindCSS
+
+Shadcn
+
+Framer Motion
+
+React Query
+
+React Hook Form
+
+Zustand
+
+Backend
+
+Supabase
+
+PostgreSQL
+
+Realtime
+
+Storage
+
+Edge Functions
+
+MAIN MODULES
+
+Home
+
+Tasbeeh
+
+Quran
+
+Azkar
+
+Prayer
+
+Memorial
+
+Family
+
+Community
+
+Challenges
+
+Statistics
+
+Profile
+
+Settings
+
+Admin
+
+HOME PAGE
+
+Contains
+
+Hero Section
+
+Today's Prayer
+
+Today's Dhikr
+
+Today's Goal
+
+Continue Reading
+
+Statistics
+
+Recent Activity
+
+Community
+
+Challenge Card
+
+Footer
+
+TASBEEH PAGE
+
+Contains
+
+Large Counter
+
+Ripple Animation
+
+Haptic
+
+Session Counter
+
+History
+
+Goals
+
+Statistics
+
+Choose Dhikr
+
+Reset
+
+Sound
+
+Vibration
+
+QURAN PAGE
+
+Contains
+
+Surahs
+
+Bookmarks
+
+Progress
+
+Reading Mode
+
+Night Mode
+
+Search
+
+Audio
+
+Tafsir
+
+Translation
+
+AZKAR
+
+Contains
+
+Morning
+
+Evening
+
+Prayer
+
+Travel
+
+Sleep
+
+Food
+
+All Categories
+
+Favorites
+
+Audio
+
+Sharing
+
+MEMORIAL SYSTEM
+
+Allow creating public pages.
+
+Fields
+
+Photo
+
+Name
+
+Gender
+
+Biography
+
+Birth Date
+
+Death Date
+
+Visibility
+
+QR Code
+
+Custom URL
+
+Share
+
+Statistics
+
+Participants
+
+Comments
+
+Recent Activities
+
+TREE OF IMPACT
+
+Every participant
+
+↓
+
+Leaf
+
+Every Dua
+
+↓
+
+Flower
+
+Every Quran Completion
+
+↓
+
+Fruit
+
+Animated Growth
+
+FAMILY SYSTEM
+
+Create Family
+
+Invite Members
+
+Share Memorials
+
+Shared Challenges
+
+Family Statistics
+
+CHALLENGES
+
+Daily
+
+Weekly
+
+Monthly
+
+Ramadan
+
+Friday
+
+Custom
+
+Global
+
+Mosque
+
+PROFILE
+
+Avatar
+
+Achievements
+
+Statistics
+
+History
+
+Favorites
+
+Goals
+
+Settings
+
+SETTINGS
+
+Theme
+
+Language
+
+Notifications
+
+Privacy
+
+Accessibility
+
+Backup
+
+Delete Account
+
+ADMIN
+
+Dashboard
+
+Analytics
+
+Users
+
+Reports
+
+Challenges
+
+Memorial Pages
+
+Quran
+
+Azkar
+
+Notifications
+
+Content Moderation
+
+DATABASE
+
+Use PostgreSQL.
+
+Normalize all tables.
+
+Use UUID.
+
+Use Foreign Keys.
+
+Enable Row Level Security.
+
+API
+
+REST + Realtime.
+
+Return consistent JSON.
+
+Use pagination.
+
+Validate every request.
+
+AUTHENTICATION
+
+Google
+
+Apple
+
+Email
+
+Anonymous
+
+PERFORMANCE
+
+SSR
+
+Lazy Loading
+
+Image Optimization
+
+Code Splitting
+
+Caching
+
+PWA
+
+Offline
+
+SEO
+
+Metadata
+
+Structured Data
+
+Open Graph
+
+Twitter Cards
+
+Sitemap
+
+Robots
+
+ACCESSIBILITY
+
+Keyboard
+
+Screen Reader
+
+Contrast
+
+RTL
+
+LTR
+
+Dynamic Font Size
+
+SECURITY
+
+JWT
+
+Rate Limit
+
+Validation
+
+Sanitization
+
+CSRF
+
+RLS
+
+Audit Logs
+
+ANIMATIONS
+
+Page Transition
+
+Ripple
+
+Fade
+
+Scale
+
+Floating
+
+Loading Skeleton
+
+Count Up
+
+QUALITY
+
+Never use lorem ipsum.
+
+Never hardcode data.
+
+Use reusable components.
+
+Use proper folder structure.
+
+Follow SOLID principles.
+
+Write clean production-ready code.
+
+FINAL GOAL
+
+Build the best Islamic web platform ever created.
+
+The platform should be beautiful enough to win design awards and scalable enough to support millions of users.
+
+📌 اقتراحات أخيرة لتطوير Athar-Islamic (ميزات V2 وV3)
+1. Athar AI
+
+مساعد ذكي داخل الموقع يجيب عن:
+
+أين أبدأ اليوم؟
+اقترح وردًا يناسب وقتي.
+ذكرني بالأذكار المناسبة.
+
+مع الاعتماد على مصادر موثوقة، وتجنب تقديم فتاوى أو أحكام شرعية جديدة.
+
+2. Athar Kids
+
+نسخة للأطفال برسوم وألعاب تعليمية عن الأذكار والقرآن.
+
+3. Mosque Dashboard
+
+لوحة تحكم خاصة بالمساجد لإدارة:
+
+حلقات القرآن.
+تحديات الذكر.
+إعلانات المسجد.
+متابعة المشاركين.
+4. Ramadan Hub
+
+يتفعل تلقائيًا في رمضان ويضيف:
+
+خطة ختم القرآن.
+مواقيت الإفطار والسحور.
+عداد العشر الأواخر.
+أهداف يومية.
+5. Hajj & Umrah Companion
+
+دليل للحج والعمرة يشمل الأدعية والخطوات والمناسك.
+
+6. Islamic Calendar
+
+تقويم هجري تفاعلي مع المناسبات الإسلامية والتنبيهات.
+
+7. Donations Directory
+
+دليل للمؤسسات الخيرية الموثوقة حسب الدولة (مع التحقق من الجهات الرسمية قبل إدراجها).
+
