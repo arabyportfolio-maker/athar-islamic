@@ -12,13 +12,30 @@ const TITLES: Record<string, string> = {
   '/prayer-times':'مواقيت الصلاة',
 }
 
-const UNREAD = 3
+import { useState, useEffect } from 'react'
 
 export function Navbar() {
   const path     = usePathname()
   const isHome   = path === '/home'
   const title    = TITLES[path]
   const isSubpage = path.match(/\/(profile|quran|legacy)\/.+/)
+
+  const [unread, setUnread] = useState(0)
+
+  useEffect(() => {
+    import('@/store/userStore').then(({ useUserStore }) => {
+      const user = useUserStore.getState().user
+      if (user) {
+        import('@/lib/supabase').then(({ supabase }) => {
+          supabase.from('notifications')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('is_read', false)
+            .then(({ count }) => setUnread(count || 0))
+        })
+      }
+    })
+  }, [])
 
   const backHref = path.startsWith('/profile/') ? '/profile'
     : path.startsWith('/quran/')   ? '/quran'
@@ -75,9 +92,9 @@ export function Navbar() {
             <Link href="/notifications" style={{ textDecoration:'none', position:'relative' }}>
               <button style={{ width:'38px', height:'38px', borderRadius:'50%', background:'#F9FAFB', border:'1px solid #E5E7EB', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
                 <Bell size={18} color="#374151" />
-                {UNREAD > 0 && (
+                {unread > 0 && (
                   <span style={{ position:'absolute', top:'-2px', left:'-2px', width:'18px', height:'18px', borderRadius:'50%', background:'#EF4444', color:'#fff', fontSize:'10px', fontWeight:800, display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid #F8F9FA' }}>
-                    {UNREAD}
+                    {unread}
                   </span>
                 )}
               </button>

@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePrayerStore } from '@/store/prayerStore'
 import { useTasbeehStore } from '@/store/tasbeehStore'
-import { Bell, Search, MapPin } from 'lucide-react'
+import { useUserStore } from '@/store/userStore'
+import { MapPin } from 'lucide-react'
 import { formatNumber } from '@/lib/utils'
 
 const QUICK_ACCESS = [
@@ -24,6 +25,8 @@ function timeToDate(timeStr: string): Date {
 export default function HomePage() {
   const { total: todayCount } = useTasbeehStore()
   const { schedule, location, fetchRealTimes } = usePrayerStore()
+
+  const { user } = useUserStore()
 
   const [currentTime, setCurrentTime] = useState(new Date())
   const [mounted, setMounted] = useState(false)
@@ -74,22 +77,13 @@ export default function HomePage() {
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
             <div className="w-full h-full bg-primary-100 flex items-center justify-center text-primary font-bold text-lg">
-              م
+              {mounted && user?.full_name ? user.full_name[0] : 'م'}
             </div>
           </div>
           <div>
             <div className="text-sm text-text-muted">السلام عليكم</div>
-            <div className="font-bold text-primary-900 text-lg">المسلم العابد</div>
+            <div className="font-bold text-primary-900 text-lg">{mounted && user?.full_name ? user.full_name : 'المسلم العابد'}</div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="w-10 h-10 rounded-full bg-white shadow-card flex items-center justify-center text-text-muted hover:text-primary transition-colors">
-            <Search size={20} />
-          </button>
-          <button className="w-10 h-10 rounded-full bg-white shadow-card flex items-center justify-center text-text-muted hover:text-primary transition-colors relative">
-            <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></div>
-            <Bell size={20} />
-          </button>
         </div>
       </header>
 
