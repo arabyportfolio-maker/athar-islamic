@@ -2,8 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Bell, CheckCircle, Info, Star, Users, Clock, X, BookMarked } from 'lucide-react'
 
-type NotifType = 'prayer'|'dhikr'|'community'|'quran'|'system'
-const TYPE_CFG: Record<NotifType,{Icon:React.ElementType;color:string;bg:string;border:string}> = {
+const TYPE_CFG: Record<string,{Icon:React.ElementType;color:string;bg:string;border:string}> = {
   prayer:    { Icon:Clock,      color:'text-primary-900', bg:'bg-primary-50', border:'border-primary-200' },
   dhikr:     { Icon:Star,       color:'text-gold-600',    bg:'bg-warm-50',    border:'border-gold-200' },
   community: { Icon:Users,      color:'text-orange-500',  bg:'bg-orange-50',  border:'border-orange-200' },
