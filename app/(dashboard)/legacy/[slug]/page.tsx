@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, use } from 'react'
 import { MOCK_MEMORIAL_PAGES } from '@/lib/constants'
 import { formatNumber } from '@/lib/utils'
 import { Bird, MapPin, Users, BookMarked, MessageSquare, HandHeart, RefreshCcw, Send, Activity, Share2, Copy, ChevronLeft } from 'lucide-react'
@@ -11,8 +11,9 @@ const ACTIVITIES = [
   { name:'أم عبد الله', action:'أضافت تعليقاً',         time:'منذ 8 دقائق', Icon: MessageSquare },
 ]
 
-export default function MemorialPage({ params }: { params: { slug: string } }) {
-  const page = MOCK_MEMORIAL_PAGES.find(p => p.slug === params.slug) || MOCK_MEMORIAL_PAGES[0]
+export default function MemorialPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
+  const page = MOCK_MEMORIAL_PAGES.find(p => p.slug === slug) || MOCK_MEMORIAL_PAGES[0]
   const [activeAction, setActiveAction] = useState<string|null>(null)
   const [counter, setCounter] = useState(0)
   const [comment, setComment] = useState('')

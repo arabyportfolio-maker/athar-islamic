@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, use } from 'react'
 import { ChevronLeft, Loader2, Play, Pause, Settings2, Share2, BookOpen, ChevronRight, Check, Bookmark, Mic2, X, PlayCircle } from 'lucide-react'
 import { ALL_SURAHS } from '@/data/quran-complete'
 import { useQuranStore, RECITERS } from '@/store/quranStore'
@@ -25,8 +25,9 @@ const AyahEnd = ({ num }: { num: number }) => (
   </span>
 )
 
-export default function SurahPage({ params }: { params: { surah: string } }) {
-  const num = parseInt(params.surah) || 1
+export default function SurahPage({ params }: { params: Promise<{ surah: string }> }) {
+  const { surah } = use(params)
+  const num = parseInt(surah) || 1
   const surahMeta = ALL_SURAHS.find(s => s.number === num)
 
   const { theme, setTheme, fontSize, setFontSize, reciterId, setReciterId, saveBookmark, getBookmark, removeBookmark } = useQuranStore()

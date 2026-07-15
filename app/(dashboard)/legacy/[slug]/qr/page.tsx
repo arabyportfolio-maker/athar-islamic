@@ -1,11 +1,13 @@
 'use client'
 import Link from 'next/link'
+import { use } from 'react'
 import { MOCK_MEMORIAL_PAGES } from '@/lib/constants'
 import { ChevronLeft, Download, Copy } from 'lucide-react'
 
-export default function QRPage({ params }: { params: { slug: string } }) {
-  const page = MOCK_MEMORIAL_PAGES.find(p => p.slug === params.slug) || MOCK_MEMORIAL_PAGES[0]
-  const url  = `https://athar-islamic.com/legacy/${params.slug}`
+export default function QRPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
+  const page = MOCK_MEMORIAL_PAGES.find(p => p.slug === slug) || MOCK_MEMORIAL_PAGES[0]
+  const url  = `https://athar-islamic.com/legacy/${slug}`
 
   return (
     <div className="min-h-screen bg-warm-100 font-sans pb-32 flex flex-col items-center justify-center px-6" dir="rtl">
@@ -58,7 +60,7 @@ export default function QRPage({ params }: { params: { slug: string } }) {
         </div>
       </div>
 
-      <Link href={`/legacy/${params.slug}`} className="mt-8 flex items-center gap-2 text-sm font-bold text-text-muted hover:text-primary transition-colors">
+      <Link href={`/legacy/${slug}`} className="mt-8 flex items-center gap-2 text-sm font-bold text-text-muted hover:text-primary transition-colors">
         <ChevronLeft size={16} className="rotate-180" /> العودة للصفحة
       </Link>
     </div>
