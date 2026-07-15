@@ -62,11 +62,23 @@ function cleanTime(t: string) {
   return t.split(' ')[0]
 }
 
-export const usePrayerStore = create<PrayerState>()(
+// Calculate Qibla bearing
+function calculateQibla(lat: number, lng: number): number {
+  const PI = Math.PI;
+  const latk = 21.422487 * (PI / 180.0);
+  const longk = 39.826206 * (PI / 180.0);
+  const phi = lat * (PI / 180.0);
+  const lambda = lng * (PI / 180.0);
+  const qibla = (180.0 / PI) * Math.atan2(Math.sin(longk - lambda), Math.cos(phi) * Math.tan(latk) - Math.sin(phi) * Math.cos(longk - lambda));
+  return (qibla + 360) % 360;
+}
+
+export const usePrayerStore = create<PrayerState & { qiblaDirection: number }>()(
   persist(
     (set, get) => ({
       schedule: DEFAULT_SCHEDULE,
       location: 'جاري تحديد الموقع...',
+      qiblaDirection: 136, // Default for Cairo
       records: {},
       streak:  0,
 
@@ -162,6 +174,8 @@ export const usePrayerStore = create<PrayerState>()(
           const lng = ipData.longitude || 31.2357
           const city = ipData.city || 'القاهرة'
           const country = ipData.country_name || 'مصر'
+          
+          const qiblaDirection = Math.round(calculateQibla(lat, lng))
 
           // 2. Fetch Prayer Times from Aladhan API
           // method=4 is Umm Al-Qura, method=5 is Egyptian, method=2 is ISNA.
@@ -181,7 +195,7 @@ export const usePrayerStore = create<PrayerState>()(
               { name:'maghrib', nameAr:'المغرب', time: cleanTime(t.Maghrib), endTime: cleanTime(t.Isha),    icon:'maghrib' },
               { name:'isha',    nameAr:'العشاء',  time: cleanTime(t.Isha),    endTime: '23:59',              icon:'isha' },
             ]
-            set({ schedule: newSchedule, location: `${city}، ${country}` })
+            set({ schedule: newSchedule, location: `${city}، ${country}`, qiblaDirection })
           }
         } catch (error) {
           console.error("Failed to fetch real prayer times:", error)

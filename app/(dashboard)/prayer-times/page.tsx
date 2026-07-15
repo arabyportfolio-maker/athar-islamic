@@ -19,17 +19,53 @@ function timeToDate(timeStr: string): Date {
 }
 
 export default function PrayerTimesPage() {
-  const { schedule, location, getCurrentPrayer } = usePrayerStore()
+  const { schedule, location, getCurrentPrayer, qiblaDirection } = usePrayerStore()
   const [currentTime, setCurrentTime] = useState(new Date())
   const [tab, setTab] = useState<'prayer' | 'qibla'>('prayer')
   const [mounted, setMounted] = useState(false)
+  const [heading, setHeading] = useState<number | null>(null)
   
   const currentPrayer = getCurrentPrayer()
+
+  const handleOrientation = (event: any) => {
+    let alpha = event.alpha;
+    let webkitCompassHeading = event.webkitCompassHeading;
+
+    if (webkitCompassHeading !== undefined) {
+      setHeading(webkitCompassHeading);
+    } else if (alpha !== null) {
+      setHeading(360 - alpha);
+    }
+  }
+
+  const requestCompassPermission = async () => {
+    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      try {
+        const permission = await (DeviceOrientationEvent as any).requestPermission();
+        if (permission === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation, true);
+        } else {
+          alert('يتطلب اتجاه القبلة إذن الوصول إلى بوصلة الهاتف.');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+      window.addEventListener('deviceorientation', handleOrientation, true);
+    }
+  }
 
   useEffect(() => {
     setMounted(true)
     const int = setInterval(() => setCurrentTime(new Date()), 1000)
-    return () => clearInterval(int)
+    
+    // Cleanup listeners
+    return () => {
+      clearInterval(int)
+      window.removeEventListener('deviceorientation', handleOrientation, true)
+      window.removeEventListener('deviceorientationabsolute', handleOrientation, true)
+    }
   }, [])
 
   // Calculate Next Prayer
@@ -146,7 +182,16 @@ export default function PrayerTimesPage() {
         {tab === 'qibla' && (
           <div className="animate-enter flex flex-col items-center pt-8">
             <h2 className="text-2xl font-bold text-primary-900 mb-2">اتجاه القبلة</h2>
-            <p className="text-text-muted text-center mb-12">الرجاء وضع الهاتف بشكل مسطح للحصول على أدق نتيجة</p>
+            <p className="text-text-muted text-center mb-6">الرجاء وضع الهاتف بشكل مسطح للحصول على أدق نتيجة</p>
+
+            {heading === null && (
+              <button 
+                onClick={requestCompassPermission}
+                className="mb-8 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-md hover:bg-primary-800 transition-colors"
+              >
+                تفعيل البوصلة 🧭
+              </button>
+            )}
 
             {/* Minimalist Elegant Qibla Compass */}
             <div className="relative w-80 h-80 rounded-full shadow-[0_20px_60px_rgba(0,0,0,0.05)] bg-white p-6 flex items-center justify-center border border-border-light">
@@ -154,45 +199,49 @@ export default function PrayerTimesPage() {
               {/* Outer Ring with Compass Points */}
               <div className="relative w-full h-full rounded-full bg-warm-50 border border-warm-200 flex items-center justify-center">
                 
-                {/* Directions (N, E, S, W) */}
-                <div className="absolute top-2 text-text-muted font-bold text-sm">ش</div>
-                <div className="absolute bottom-2 text-text-muted font-bold text-sm">ج</div>
-                <div className="absolute right-4 text-text-muted font-bold text-sm">ق</div>
-                <div className="absolute left-4 text-text-muted font-bold text-sm">غ</div>
+                {/* Directions (N, E, S, W) - rotate the whole ring opposite to heading to keep North up, or rotate the inner dial? */}
+                {/* Usually the compass outer ring stays fixed, and the needle points North. Or the outer ring rotates so North is always aligned with actual North. */}
+                {/* Let's rotate the inner dial so the needle points to Qibla, relative to the phone. */}
+                <div 
+                  className="absolute inset-0 transition-transform duration-300 ease-out" 
+                  style={{ transform: `rotate(${-(heading || 0)}deg)` }}
+                >
+                  <div className="absolute top-2 left-1/2 -translate-x-1/2 text-text-muted font-bold text-sm">ش</div>
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-text-muted font-bold text-sm">ج</div>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-sm">ق</div>
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-sm">غ</div>
 
-                {/* Compass Degree Ticks SVG */}
-                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                  {Array.from({ length: 72 }).map((_, i) => (
-                    <line
-                      key={i}
-                      x1="50" y1="12" x2="50" y2={i % 6 === 0 ? "16" : "14"}
-                      stroke={i % 6 === 0 ? "#94a3b8" : "#cbd5e1"}
-                      strokeWidth={i % 6 === 0 ? "0.6" : "0.3"}
-                      transform={`rotate(${i * 5} 50 50)`}
-                    />
-                  ))}
-                </svg>
+                  {/* Compass Degree Ticks SVG */}
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                    {Array.from({ length: 72 }).map((_, i) => (
+                      <line
+                        key={i}
+                        x1="50" y1="12" x2="50" y2={i % 6 === 0 ? "16" : "14"}
+                        stroke={i % 6 === 0 ? "#94a3b8" : "#cbd5e1"}
+                        strokeWidth={i % 6 === 0 ? "0.6" : "0.3"}
+                        transform={`rotate(${i * 5} 50 50)`}
+                      />
+                    ))}
+                  </svg>
+                </div>
 
                 {/* Inner Compass Area */}
                 <div className="relative w-40 h-40 rounded-full border border-warm-200/50 shadow-inner flex items-center justify-center bg-white">
                   
-                  {/* Rotating Dial (represents the phone's orientation relative to North) */}
-                  {/* For now, we simulate the Kaaba direction at 118 degrees */}
-                  <div className="absolute inset-0 transition-transform duration-700 ease-out" style={{ transform: 'rotate(118deg)' }}>
+                  {/* Rotating Dial (represents the Kaaba direction relative to North) */}
+                  <div className="absolute inset-0 transition-transform duration-300 ease-out" style={{ transform: `rotate(${qiblaDirection - (heading || 0)}deg)` }}>
                     
                     {/* The Compass Needle */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      {/* Pointer to Qibla */}
                       <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[60px] border-b-primary-500 mb-[60px]"></div>
                     </div>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      {/* Tail of Needle */}
                       <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[40px] border-t-warm-300 mt-[100px]"></div>
                     </div>
 
-                    {/* Kaaba Icon on the Edge of the ring */}
+                    {/* Kaaba Icon */}
                     <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                      <div className="relative w-8 h-10 bg-[#1a1a1a] rounded shadow-lg flex flex-col items-center border border-black overflow-hidden" style={{ transform: 'rotate(-118deg)' }}>
+                      <div className="relative w-8 h-10 bg-[#1a1a1a] rounded shadow-lg flex flex-col items-center border border-black overflow-hidden">
                         <div className="w-full mt-2 h-1 bg-gold-400"></div>
                       </div>
                     </div>
@@ -207,7 +256,7 @@ export default function PrayerTimesPage() {
             </div>
 
             <div className="mt-12 text-center">
-              <div className="text-4xl font-black text-primary-900 font-arabic mb-2 text-shadow-sm">118°</div>
+              <div className="text-4xl font-black text-primary-900 font-arabic mb-2 text-shadow-sm">{qiblaDirection}°</div>
               <div className="bg-white px-6 py-3 rounded-full shadow-sm border border-border-light flex items-center justify-center gap-2">
                 <Compass size={18} className="text-gold-600" />
                 <span className="font-bold text-text-muted text-sm">مكة المكرمة - اتجاه القبلة</span>

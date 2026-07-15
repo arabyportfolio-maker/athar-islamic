@@ -77,12 +77,12 @@ export default function HomePage() {
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
             <div className="w-full h-full bg-primary-100 flex items-center justify-center text-primary font-bold text-lg">
-              {mounted && user?.full_name ? user.full_name[0] : 'م'}
+              {mounted && user?.user_metadata?.full_name ? user.user_metadata.full_name[0] : 'م'}
             </div>
           </div>
           <div>
             <div className="text-sm text-text-muted">السلام عليكم</div>
-            <div className="font-bold text-primary-900 text-lg">{mounted && user?.full_name ? user.full_name : 'المسلم العابد'}</div>
+            <div className="font-bold text-primary-900 text-lg">{mounted && user?.user_metadata?.full_name ? user.user_metadata.full_name : 'المسلم العابد'}</div>
           </div>
         </div>
       </header>

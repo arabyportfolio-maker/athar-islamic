@@ -10,9 +10,11 @@ const STATS = [
   { val:'22',     label:'ختمة',   Icon: BookMarked, color:'text-primary', bg:'bg-primary-50' },
 ]
 
+import { useUserStore } from '@/store/userStore'
+
 const ACHIEVEMENTS = [
-  { title:'المسبّح الأول',  desc:'1000 تسبيحة',   locked:false, Icon: Award, color:'text-gold-600', bg:'bg-warm-50', border:'border-gold-200' },
-  { title:'حافظ القرآن',   desc:'ختمة كاملة',     locked:false, Icon: BookMarked, color:'text-primary-900', bg:'bg-primary-50', border:'border-primary-200' },
+  { title:'المسبّح الأول',  desc:'1000 تسبيحة',   locked:true, Icon: Award, color:'text-text-muted', bg:'bg-warm-100', border:'border-border-light' },
+  { title:'حافظ القرآن',   desc:'ختمة كاملة',     locked:true, Icon: BookMarked, color:'text-text-muted', bg:'bg-warm-100', border:'border-border-light' },
   { title:'المداوم',       desc:'30 يوم متواصل',  locked:true,  Icon: Flame, color:'text-text-muted', bg:'bg-warm-100', border:'border-border-light' },
   { title:'الداعي',        desc:'100 مشاركة',     locked:true,  Icon: Star, color:'text-text-muted', bg:'bg-warm-100', border:'border-border-light' },
 ]
@@ -27,35 +29,31 @@ const MENU = [
 
 export default function ProfilePage() {
   const [stats, setStats] = useState({ tasbeeh: 0, sessions: 0, quran: 0 })
-  const [userProfile, setUserProfile] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, loading: userLoading } = useUserStore()
+  const [statsLoading, setStatsLoading] = useState(true)
 
   useEffect(() => {
-    import('@/store/userStore').then(({ useUserStore }) => {
-      const user = useUserStore.getState().user
-      if (user) {
-        setUserProfile(user)
-        import('@/lib/supabase').then(({ supabase }) => {
-          Promise.all([
-            supabase.from('tasbeeh_records').select('count').eq('user_id', user.id),
-            supabase.from('quran_records').select('id').eq('user_id', user.id)
-          ]).then(([tasbeehRes, quranRes]) => {
-            const totalTasbeeh = tasbeehRes.data?.reduce((acc, row) => acc + (row.count || 0), 0) || 0
-            const sessions = tasbeehRes.data?.length || 0
-            const quranBookmarks = quranRes.data?.length || 0
-            setStats({ tasbeeh: totalTasbeeh, sessions, quran: quranBookmarks })
-            setLoading(false)
-          })
+    if (user) {
+      import('@/lib/supabase').then(({ supabase }) => {
+        Promise.all([
+          supabase.from('tasbeeh_records').select('count').eq('user_id', user.id),
+          supabase.from('quran_records').select('id').eq('user_id', user.id)
+        ]).then(([tasbeehRes, quranRes]) => {
+          const totalTasbeeh = tasbeehRes.data?.reduce((acc, row) => acc + (row.count || 0), 0) || 0
+          const sessions = tasbeehRes.data?.length || 0
+          const quranBookmarks = quranRes.data?.length || 0
+          setStats({ tasbeeh: totalTasbeeh, sessions, quran: quranBookmarks })
+          setStatsLoading(false)
         })
-      } else {
-        setLoading(false)
-      }
-    })
-  }, [])
+      })
+    } else {
+      setStatsLoading(false)
+    }
+  }, [user])
 
-  if (loading) return <div className="p-8 text-center font-bold text-primary-900">جاري التحميل...</div>
+  if (userLoading || statsLoading) return <div className="p-8 text-center font-bold text-primary-900">جاري التحميل...</div>
 
-  if (!userProfile) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-warm-100 flex flex-col items-center justify-center p-6" dir="rtl">
         <h2 className="text-xl font-bold text-primary-900 mb-4">يجب تسجيل الدخول</h2>
@@ -89,11 +87,11 @@ export default function ProfilePage() {
         
         <div className="absolute -bottom-14 right-6 flex items-end gap-4 z-20">
           <div className="w-24 h-24 rounded-[1.5rem] bg-gradient-to-br from-gold-400 to-orange-500 border-4 border-warm-100 shadow-floating flex items-center justify-center text-3xl font-black text-white">
-            {userProfile.user_metadata?.full_name?.charAt(0) || userProfile.email?.charAt(0) || 'أ'}
+            {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'أ'}
           </div>
           <div className="mb-2">
-            <div className="text-xl font-bold text-primary-900 leading-tight">{userProfile.user_metadata?.full_name || 'مستخدم أثر'}</div>
-            <div className="text-sm font-semibold text-text-muted">{userProfile.email}</div>
+            <div className="text-xl font-bold text-primary-900 leading-tight">{user?.user_metadata?.full_name || 'مستخدم أثر'}</div>
+            <div className="text-sm font-semibold text-text-muted">{user?.email}</div>
           </div>
         </div>
       </div>
@@ -121,12 +119,12 @@ export default function ProfilePage() {
             <Flame size={28} className="text-orange-500" />
           </div>
           <div className="relative z-10 flex-1">
-            <div className="text-lg font-black text-orange-600 mb-0.5">7 أيام متواصلة</div>
+            <div className="text-lg font-black text-orange-600 mb-0.5">0 أيام متواصلة</div>
             <div className="text-xs font-bold text-text-muted">سلسلة ذكر يومية</div>
           </div>
           <div className="relative z-10 flex gap-1 shrink-0">
             {Array.from({length:7},(_,i) => (
-              <div key={i} className={`w-2.5 h-2.5 rounded-full ${i<7 ? 'bg-orange-500 shadow-sm' : 'bg-warm-200'}`} />
+              <div key={i} className={`w-2.5 h-2.5 rounded-full bg-warm-200`} />
             ))}
           </div>
         </div>
