@@ -46,7 +46,7 @@ export default function PWAInstallPrompt() {
   if (!showPrompt) return null
 
   return (
-    <div className="fixed bottom-24 left-4 right-4 z-50 bg-primary-900 text-white p-4 rounded-2xl shadow-xl flex items-center gap-4 animate-enter" dir="rtl">
+    <div className="fixed bottom-28 left-4 right-4 z-[200] bg-primary-900 text-white p-4 rounded-2xl shadow-xl flex items-center gap-4 animate-enter" dir="rtl">
       <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
         <Download size={24} className="text-gold-400" />
       </div>
